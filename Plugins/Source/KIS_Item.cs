@@ -337,7 +337,7 @@ namespace KIS
             {
                 equippedGameObj.transform.rotation = evaTransform.rotation * Quaternion.Euler(prefabModule.equipDir);
                 equippedGameObj.transform.position = evaTransform.TransformPoint(prefabModule.equipPos);
-                if (equippedPart) if (equippedPart.rigidbody) equippedPart.rigidbody.velocity = equippedPart.vessel.rootPart.rigidbody.velocity;
+                if (equippedPart) if (equippedPart.rb) equippedPart.rb.velocity = equippedPart.vessel.rootPart.rb.velocity;
             }
             if (prefabModule) prefabModule.OnItemUpdate(this);
         }
@@ -581,7 +581,7 @@ namespace KIS
                 {
                     UnityEngine.Object.DestroyImmediate(equippedPart.collisionEnhancer);
                 }
-                UnityEngine.Object.Destroy(equippedPart.rigidbody);
+                UnityEngine.Object.Destroy(equippedPart.rb);
             }
 
             if (equipMode == EquipMode.Physic)
@@ -601,7 +601,7 @@ namespace KIS
 
                 //Create physic join
                 FixedJoint evaJoint = equippedPart.gameObject.AddComponent<FixedJoint>();
-                evaJoint.connectedBody = this.inventory.part.rigidbody;//evaCollider.attachedRigidbody;
+                evaJoint.connectedBody = this.inventory.part.rb;//evaCollider.attachedRigidbody;
                 evaJoint.breakForce = 5;
                 evaJoint.breakTorque = 5;
                 KIS_Shared.ResetCollisionEnhancer(equippedPart);

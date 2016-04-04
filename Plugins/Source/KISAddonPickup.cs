@@ -3,30 +3,28 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using KSP.UI.Screens;
 
 namespace KIS
 {
     public class KISAddonPickup : MonoBehaviour
     {
-        class EditorClickListener : MonoBehaviour
+        class EditorClickListener : KSP.UI.PointerClickHandler
         {
             EditorPartIcon editorPaction;
-            void Start()
-            {
-                GetComponent<UIButton>().AddInputDelegate(new EZInputDelegate(OnInput));
-                editorPaction = GetComponent<EditorPartIcon>();
-            }
+			void Start()
+			{
+				editorPaction = this.GetComponentInParent<EditorPartIcon>();
+			}
 
-            void OnInput(ref POINTER_INFO ptr)
-            {
-                if (ptr.evt == POINTER_INFO.INPUT_EVENT.PRESS)
-                {
-                    if (!editorPaction.isGrey) KISAddonPickup.instance.OnMouseGrabPartClick(editorPaction.partInfo.partPrefab);
-                }
-            }
-        }
+			public override void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData)
+			{
+				Debug.Log("running on input");
+				if (!editorPaction.isGrey) KISAddonPickup.instance.OnMouseGrabPartClick(editorPaction.partInfo.partPrefab);
+			}
+		}
 
-        const string GrabIcon = "KIS/Textures/grab";
+		const string GrabIcon = "KIS/Textures/grab";
         const string GrabOkIcon = "KIS/Textures/grabOk";
         const string ForbiddenIcon = "KIS/Textures/forbidden";
         const string TooFarIcon = "KIS/Textures/tooFar";
@@ -218,9 +216,9 @@ namespace KIS
             {
                 if (EditorPartList.Instance)
                 {
-                    var iconPrefab = EditorPartList.Instance.iconPrefab.gameObject;
-                    if (iconPrefab.GetComponent<EditorClickListener>() == null) {
-                        EditorPartList.Instance.iconPrefab.gameObject.AddComponent<EditorClickListener>();
+					var iconPrefab = EditorPartList.Instance.partPrefab.gameObject;
+					if (iconPrefab.GetComponent<EditorClickListener>() == null) {
+						iconPrefab.AddComponent<EditorClickListener>();
                     } else {
                         KSPDev.Logger.logWarning("Skip adding click listener because it exists");
                     }
@@ -267,7 +265,7 @@ namespace KIS
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    if (!UIManager.instance.DidPointerHitUI(0) && InputLockManager.IsUnlocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
+					if (InputLockManager.IsUnlocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
                     {
                         Part part = KIS_Shared.GetPartUnderCursor();
                         if (part)

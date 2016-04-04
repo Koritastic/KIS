@@ -53,7 +53,7 @@ namespace KIS
             KSPDev.Logger.logInfo("Loading clip: {0}", clipPath);
             source = audioGo.AddComponent<AudioSource>();
             source.volume = GameSettings.UI_VOLUME;
-            source.panLevel = 0;  //set as 2D audiosource
+            source.spatialBlend = 0.0f;  //set as 2D audiosource
 
             if (GameDatabase.Instance.ExistsAudioClip(clipPath)) {
                 source.clip = GameDatabase.Instance.GetAudioClip(clipPath);
@@ -110,7 +110,6 @@ namespace KIS
             group.audio.volume = GameSettings.SHIP_VOLUME;
             group.audio.rolloffMode = AudioRolloffMode.Linear;
             group.audio.dopplerLevel = 0f;
-            group.audio.panLevel = 1f;
             group.audio.maxDistance = maxDistance;
             group.audio.loop = loop;
             group.audio.playOnAwake = false;
@@ -390,25 +389,25 @@ namespace KIS
             newPart.Unpack();
             newPart.InitializeModules();
 
-            //FIXME: [Error]: Actor::setLinearVelocity: Actor must be (non-kinematic) dynamic!
-            //FIXME: [Error]: Actor::setAngularVelocity: Actor must be (non-kinematic) dynamic!            
-            if (coupleToPart)
+			//FIXME: [Error]: Actor::setLinearVelocity: Actor must be (non-kinematic) dynamic!
+			//FIXME: [Error]: Actor::setAngularVelocity: Actor must be (non-kinematic) dynamic!
+			if (coupleToPart)
             {
-                newPart.rigidbody.velocity = coupleToPart.rigidbody.velocity;
-                newPart.rigidbody.angularVelocity = coupleToPart.rigidbody.angularVelocity;
+				newPart.rb.velocity = coupleToPart.rb.velocity;
+				newPart.rb.angularVelocity = coupleToPart.rb.angularVelocity;
             }
             else
             {
-                if (fromPart.rigidbody)
+				if (fromPart.rb)
                 {
-                    newPart.rigidbody.velocity = fromPart.rigidbody.velocity;
-                    newPart.rigidbody.angularVelocity = fromPart.rigidbody.angularVelocity;
+					newPart.rb.velocity = fromPart.rb.velocity;
+					newPart.rb.angularVelocity = fromPart.rb.angularVelocity;
                 }
                 else
                 {
-                    // If fromPart is a carried container
-                    newPart.rigidbody.velocity = fromPart.vessel.rootPart.rigidbody.velocity;
-                    newPart.rigidbody.angularVelocity = fromPart.vessel.rootPart.rigidbody.angularVelocity;
+					// If fromPart is a carried container
+					newPart.rb.velocity = fromPart.vessel.rootPart.rb.velocity;
+					newPart.rb.angularVelocity = fromPart.vessel.rootPart.rb.angularVelocity;
                 }
             }
 
@@ -631,12 +630,12 @@ namespace KIS
             if (!node.icon)
             {
                 node.icon = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                if (node.icon.collider) UnityEngine.Object.DestroyImmediate(node.icon.collider);
-                if (node.icon.renderer)
+                if (node.icon.GetComponent<Collider>()) UnityEngine.Object.DestroyImmediate(node.icon.GetComponent<Collider>());
+                if (node.icon.GetComponent<Renderer>())
                 {
-                    node.icon.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
+                    node.icon.GetComponent<Renderer>().material = new Material(Shader.Find("Transparent/Diffuse"));
                     iconColor.a = 0.5f;
-                    node.icon.renderer.material.color = iconColor;
+                    node.icon.GetComponent<Renderer>().material.color = iconColor;
                 }
                 node.icon.transform.parent = part.transform;
                 if (name != null) node.icon.name = name;

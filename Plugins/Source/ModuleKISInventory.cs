@@ -155,7 +155,6 @@ namespace KIS
             sndFx.audio.volume = GameSettings.SHIP_VOLUME;
             sndFx.audio.rolloffMode = AudioRolloffMode.Linear;
             sndFx.audio.dopplerLevel = 0f;
-            sndFx.audio.panLevel = 1f;
             sndFx.audio.maxDistance = 10;
             sndFx.audio.loop = false;
             sndFx.audio.playOnAwake = false;
@@ -352,12 +351,12 @@ namespace KIS
                 if (uiSnd)
                 {
                     sndFx.audio.volume = GameSettings.UI_VOLUME;
-                    sndFx.audio.panLevel = 0;  //set as 2D audiosource
+                    sndFx.audio.spatialBlend = 0.0f;  //set as 2D audiosource
                 }
                 else
                 {
                     sndFx.audio.volume = GameSettings.SHIP_VOLUME;
-                    sndFx.audio.panLevel = 1;  //set as 3D audiosource
+                    sndFx.audio.spatialBlend = 1.0f;  //set as 3D audiosource
                 }
             }
             else
@@ -966,7 +965,7 @@ namespace KIS
             {
                 if (skmr.name == "helmet" || skmr.name == "visor")
                 {
-                    skmr.renderer.enabled = active;
+                    skmr.GetComponent<Renderer>().enabled = active;
                     helmetEquipped = active;
                 }
             }
@@ -978,8 +977,8 @@ namespace KIS
                 if (light.name == "headlamp")
                 {
                     light.enabled = active;
-                    light.transform.Find("flare1").renderer.enabled = active;
-                    light.transform.Find("flare2").renderer.enabled = active;
+                    light.transform.Find("flare1").GetComponent<Renderer>().enabled = active;
+                    light.transform.Find("flare2").GetComponent<Renderer>().enabled = active;
                 }
             }
 
@@ -1052,10 +1051,8 @@ namespace KIS
             {
                 title = this.part.partInfo.title + " | " + invName;
             }
-
             guiMainWindowPos = GUILayout.Window(GetInstanceID(), guiMainWindowPos, GuiMain, title);
-
-            if (tooltipItem != null)
+			if (tooltipItem != null)
             {
                 if (contextItem == null)
                 {
@@ -1078,18 +1075,17 @@ namespace KIS
                     contextItem = null;
                 }
             }
-
-            if (debugItem != null)
+			if (debugItem != null)
             {
                 guiDebugWindowPos = GUILayout.Window(GetInstanceID() + 782, guiDebugWindowPos, GuiDebugItem, "Debug item");
             }
-
-            // Disable Click through
-            if (HighLogic.LoadedSceneIsEditor)
+			// Disable Click through
+			if (HighLogic.LoadedSceneIsEditor)
             {
-                if (guiMainWindowPos.Contains(Event.current.mousePosition) && !clickThroughLocked)
+				if (guiMainWindowPos.Contains(Event.current.mousePosition) && !clickThroughLocked)
                 {
-                    EditorTooltip.Instance.HideToolTip();
+					if(EditorTooltip.Instance)
+						EditorTooltip.Instance.HideToolTip();
                     InputLockManager.SetControlLock(ControlTypes.EDITOR_PAD_PICK_PLACE, "KISInventoryEditorLock");
                     clickThroughLocked = true;
                 }
@@ -1101,7 +1097,7 @@ namespace KIS
             }
             else if (HighLogic.LoadedSceneIsFlight)
             {
-                if (guiMainWindowPos.Contains(Event.current.mousePosition) && !clickThroughLocked)
+				if (guiMainWindowPos.Contains(Event.current.mousePosition) && !clickThroughLocked)
                 {
                     InputLockManager.SetControlLock(ControlTypes.CAMERACONTROLS | ControlTypes.MAP, "KISInventoryFlightLock");
                     clickThroughLocked = true;

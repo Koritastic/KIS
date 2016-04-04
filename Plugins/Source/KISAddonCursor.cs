@@ -116,15 +116,15 @@ namespace KIS
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    if (!UIManager.instance.DidPointerHitUI(0) && InputLockManager.IsUnlocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
-                    {
-                        Part part = KIS_Shared.GetPartUnderCursor();
-                        if (part)
-                        {
-                            if (delegateOnMousePartClick != null) delegateOnMousePartClick(part);
-                        }
-                    }
-                }
+					if (InputLockManager.IsUnlocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
+					{
+						Part part = KIS_Shared.GetPartUnderCursor();
+						if (part)
+						{
+							if (delegateOnMousePartClick != null) delegateOnMousePartClick(part);
+						}
+					}
+				}
             }
         }
 
@@ -138,7 +138,7 @@ namespace KIS
         public static void CursorEnable(string texturePath, string text, List<string> additionalTexts = null)
         {
             cursorShow = true;
-            Screen.showCursor = false;
+            Cursor.visible = false;
             cursorTexture = GameDatabase.Instance.GetTexture(texturePath, false);
             cursorText = text;
             cursorAdditionalTexts = additionalTexts;
@@ -147,13 +147,13 @@ namespace KIS
         public static void CursorDefault()
         {
             cursorShow = false;
-            Screen.showCursor = true;
+			Cursor.visible = true;
         }
 
         public static void CursorDisable()
         {
             cursorShow = false;
-            Screen.showCursor = false;
+			Cursor.visible = false;
         }
 
         /// <summary>Makes a texture with the requested background color.</summary>
@@ -176,7 +176,8 @@ namespace KIS
             if (draggedPart)
             {
                 GUI.depth = 0;
-                GUI.DrawTexture(new Rect(Event.current.mousePosition.x - (draggedIconSize / 2), Event.current.mousePosition.y - (draggedIconSize / 2), draggedIconSize, draggedIconSize), icon.texture, ScaleMode.ScaleToFit);
+                GUI.
+				Texture(new Rect(Event.current.mousePosition.x - (draggedIconSize / 2), Event.current.mousePosition.y - (draggedIconSize / 2), draggedIconSize, draggedIconSize), icon.texture, ScaleMode.ScaleToFit);
             */
 
             if (cursorShow)

@@ -139,7 +139,7 @@ namespace KIS
         {
             audioBipWrong = audioGo.AddComponent<AudioSource>();
             audioBipWrong.volume = GameSettings.UI_VOLUME;
-            audioBipWrong.panLevel = 0;  //set as 2D audiosource
+			audioBipWrong.spatialBlend = 0.0f;
 
             if (GameDatabase.Instance.ExistsAudioClip(KIS_Shared.bipWrongSndPath))
             {
@@ -248,7 +248,7 @@ namespace KIS
                         if (an.icon)
                         {
                             float dist;
-                            if (an.icon.renderer.bounds.IntersectRay(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out dist))
+                            if (an.icon.GetRendererBounds().IntersectRay(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out dist))
                             {
                                 if (dist < currentDist)
                                 {
@@ -722,7 +722,7 @@ namespace KIS
                 var childObj = new GameObject("KISPointerChildMesh");
 
                 var meshRenderer = childObj.AddComponent<MeshRenderer>();
-                meshRenderer.castShadows = false;
+				meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 meshRenderer.receiveShadows = false;
 
                 var filter = childObj.AddComponent<MeshFilter>();

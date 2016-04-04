@@ -134,9 +134,9 @@ namespace KIS
             KSPDev.Logger.logInfo("Create kinematic rigidbody");
             if (connectedGameObject) Destroy(connectedGameObject);
             GameObject obj = new GameObject("KISBody");
-            obj.AddComponent<Rigidbody>();
-            obj.rigidbody.mass = 100;
-            obj.rigidbody.isKinematic = true;
+			obj.AddComponent<Rigidbody>();
+            obj.GetComponent<Rigidbody>().mass = 100;
+			obj.GetComponent<Rigidbody>().isKinematic = true;
             obj.transform.position = this.part.transform.position;
             obj.transform.rotation = this.part.transform.rotation;
             connectedGameObject = obj;
@@ -146,7 +146,7 @@ namespace KIS
             FixedJoint CurJoint = this.part.gameObject.AddComponent<FixedJoint>();
             CurJoint.breakForce = staticAttachBreakForce;
             CurJoint.breakTorque = staticAttachBreakForce;
-            CurJoint.connectedBody = obj.rigidbody;
+            CurJoint.connectedBody = obj.GetComponent<Rigidbody>();
             fixedJoint = CurJoint;
             this.part.vessel.Landed = true;
             staticAttached = true;

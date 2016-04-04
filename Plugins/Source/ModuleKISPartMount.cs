@@ -44,9 +44,9 @@ namespace KIS
             sndFxStore.audio = part.gameObject.AddComponent<AudioSource>();
             sndFxStore.audio.volume = GameSettings.SHIP_VOLUME;
             sndFxStore.audio.rolloffMode = AudioRolloffMode.Linear;
-            sndFxStore.audio.dopplerLevel = 0f;
-            sndFxStore.audio.panLevel = 1f;
-            sndFxStore.audio.maxDistance = 10;
+			sndFxStore.audio.dopplerLevel = 0f;
+			sndFxStore.audio.spatialBlend = 1.0f;
+			sndFxStore.audio.maxDistance = 10;
             sndFxStore.audio.loop = false;
             sndFxStore.audio.playOnAwake = false;
             sndFxStore.audio.clip = GameDatabase.Instance.GetAudioClip(sndStorePath);
