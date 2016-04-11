@@ -8,8 +8,8 @@ namespace KIS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class KISAddonPointer : MonoBehaviour
     {
-        public GameObject audioGo = new GameObject();
-        public AudioSource audioBipWrong = new AudioSource();
+		public GameObject audioGo;// = new GameObject();
+		public AudioSource audioBipWrong;// = new AudioSource();
         public static GameObject soundGo;
 
         // Pointer parameters
@@ -132,12 +132,17 @@ namespace KIS
 
         void Awake()
         {
-            KSPDev.LoggedCallWrapper.Action(Internal_Awake);
+            Internal_Awake();
         }
         
         private void Internal_Awake()
         {
-            audioBipWrong = audioGo.AddComponent<AudioSource>();
+			if (!audioGo)
+				audioGo = new GameObject();
+			if (!audioBipWrong)
+				audioBipWrong = new AudioSource();
+
+			audioBipWrong = audioGo.AddComponent<AudioSource>();
             audioBipWrong.volume = GameSettings.UI_VOLUME;
 			audioBipWrong.spatialBlend = 0.0f;
 
@@ -147,8 +152,7 @@ namespace KIS
             }
             else
             {
-                KSPDev.Logger.logError(
-                    "Awake(AttachPointer) Bip wrong sound not found in the game database !");
+                //KSPDev.Logger.logError("Awake(AttachPointer) Bip wrong sound not found in the game database !");
             }
         }
 
@@ -156,7 +160,7 @@ namespace KIS
         {
             if (!running)
             {
-                KSPDev.Logger.logTrace("StartPointer(pointer)");
+                //KSPDev.Logger.logTrace("StartPointer(pointer)");
                 customRot = Vector3.zero;
                 aboveDistance = 0;
                 partToAttach = partToMoveAndAttach;
@@ -174,7 +178,7 @@ namespace KIS
 
         public static void StopPointer()
         {
-            KSPDev.Logger.logInfo("StopPointer(pointer)");
+            //KSPDev.Logger.logInfo("StopPointer(pointer)");
             running = false;
             ResetMouseOver();
             InputLockManager.RemoveControlLock("KISpointer");
@@ -183,7 +187,7 @@ namespace KIS
         }
 
         public void Update() {
-            KSPDev.LoggedCallWrapper.Action(Internal_Update);
+            Internal_Update();
         }
         
         private void Internal_Update()
@@ -645,7 +649,7 @@ namespace KIS
                 || Input.GetKeyDown(KeyCode.Return)
                 )
                 {
-                    KSPDev.Logger.logInfo("Cancel key pressed, stop eva attach mode");
+                    //KSPDev.Logger.logInfo("Cancel key pressed, stop eva attach mode");
                     StopPointer();
                     SendPointerClick(PointerTarget.Nothing, Vector3.zero, Quaternion.identity, null, null);
                 }
@@ -657,8 +661,7 @@ namespace KIS
                             if (attachNodeIndex > (attachNodes.Count - 1)) {
                                 attachNodeIndex = 0;
                             }
-                            KSPDev.Logger.logInfo("Attach node index changed to: {0}",
-                                                   attachNodeIndex);
+                            //KSPDev.Logger.logInfo("Attach node index changed to: {0}", attachNodeIndex);
                             UpdatePointerAttachNode();
                             ResetMouseOver();
                             SendPointerState(
@@ -695,7 +698,7 @@ namespace KIS
                 }
                 mr.enabled = isVisible;
             }
-            KSPDev.Logger.logTrace("Pointer visibility state set to: {0}", isVisible);
+            //KSPDev.Logger.logTrace("Pointer visibility state set to: {0}", isVisible);
         }
 
         /// <summary>Makes a game object to represent currently dragging assembly.</summary>
@@ -738,7 +741,7 @@ namespace KIS
             }
 
             pointerNodeTransform.parent = pointer.transform;
-            KSPDev.Logger.logInfo("Pointer created");
+            //KSPDev.Logger.logInfo("Pointer created");
         }
 
         /// <summary>Sets possible attach nodes in <c>attachNodes</c>.</summary>
@@ -760,8 +763,7 @@ namespace KIS
                 // Ideally, the caller should have checked if this part has free nodes. Now the only
                 // way is top pick *any* node. The surface one always exists so, it's a good
                 // candidate. Though, for many details it may result in a weird representation.
-                KSPDev.Logger.logError("Part {0} has no free nodes, use {1}",
-                                        partToAttach, partToAttach.srfAttachNode);
+                //KSPDev.Logger.logError("Part {0} has no free nodes, use {1}", partToAttach, partToAttach.srfAttachNode);
                 attachNodes.Add(partToAttach.srfAttachNode);
             }
 
@@ -769,18 +771,17 @@ namespace KIS
             attachNodeIndex = -1;
             if (attachNodes[0].nodeType == AttachNode.NodeType.Surface) {
                 // Surface is always the best one. May be not for docking ports, though.
-                KSPDev.Logger.logTrace("Surface node set to default");
+                //KSPDev.Logger.logTrace("Surface node set to default");
                 attachNodeIndex = 0;
             } else {
                 // In VAB "bottom" is a usual node so, prefer it when available.
                 attachNodeIndex = attachNodes.FindIndex(an => an.id.Equals("bottom"));
                 if (attachNodeIndex != -1) {
-                    KSPDev.Logger.logTrace("Bottom node set to default");
+                    //KSPDev.Logger.logTrace("Bottom node set to default");
                 } else {
                     // Fallback if no default node is found.
                     attachNodeIndex = 0;
-                    KSPDev.Logger.logTrace("Fallback: '{0}' node set to default",
-                                            attachNodes[attachNodeIndex].id);
+                    //KSPDev.Logger.logTrace("Fallback: '{0}' node set to default", attachNodes[attachNodeIndex].id);
                 }
             }
 
@@ -811,7 +812,7 @@ namespace KIS
 
             // On large assemblies memory consumption can be significant. Reclaim it.
             Resources.UnloadUnusedAssets();
-            KSPDev.Logger.logInfo("Pointer destroyed");
+            //KSPDev.Logger.logInfo("Pointer destroyed");
         }
 
         /// <summary>Goes thru part assembly and collects all meshes in the hierarchy.</summary>
@@ -827,8 +828,7 @@ namespace KIS
                                                       List<CombineInstance> meshCombines) {
             // This gives part's mesh(es) and all surface attached children part meshes.
             MeshFilter[] meshFilters = assembly.GetComponentsInChildren<MeshFilter>();
-            KSPDev.Logger.logTrace(
-                "Found {0} children meshes in: {1}", meshFilters.Count(), assembly);
+            //KSPDev.Logger.logTrace("Found {0} children meshes in: {1}", meshFilters.Count(), assembly);
             foreach (var meshFilter in meshFilters) {
                 var combine = new CombineInstance();
                 combine.mesh = meshFilter.sharedMesh;
@@ -839,7 +839,7 @@ namespace KIS
             // Go thru the stacked children parts. They don't have local transformation.
             foreach (Part child in assembly.children) {
                 if (child.transform.position.Equals(child.transform.localPosition)) {
-                    KSPDev.Logger.logTrace("Collect meshes from stacked child: {0}", child);
+                    //KSPDev.Logger.logTrace("Collect meshes from stacked child: {0}", child);
                     CollectMeshesFromAssembly(child, worldTransform, meshCombines);
                 }
             }
@@ -853,8 +853,7 @@ namespace KIS
             var model = prefabPart.FindModelTransform("model").gameObject;
             var meshModel = Instantiate(model, Vector3.zero, Quaternion.identity) as GameObject;
             var meshFilters = meshModel.GetComponentsInChildren<MeshFilter>();
-            KSPDev.Logger.logTrace("Created {0} meshes from prefab: {1}",
-                                    meshFilters.Count(), prefabPart);
+            //KSPDev.Logger.logTrace("Created {0} meshes from prefab: {1}",meshFilters.Count(), prefabPart);
             foreach (var meshFilter in meshFilters) {
                 var combine = new CombineInstance();
                 combine.mesh = meshFilter.mesh;  // Get a copy. 

@@ -14,17 +14,17 @@ namespace KIS
 
         public void Awake()
         {
-            KSPDev.LoggedCallWrapper.Action(Internal_Awake);
+            Internal_Awake();
         }
         
         private void Internal_Awake()
         {
             // Set inventory module for every eva kerbal
-            KSPDev.Logger.logInfo("Set KIS config...");
+            //KSPDev.Logger.logInfo("Set KIS config...");
             ConfigNode nodeSettings = GameDatabase.Instance.GetConfigNode("KIS/settings/KISConfig");
             if (nodeSettings == null)
             {
-                KSPDev.Logger.logError("KIS settings.cfg not found or invalid !");
+                //KSPDev.Logger.logError("KIS settings.cfg not found or invalid !");
                 return;
             }
 
@@ -69,7 +69,7 @@ namespace KIS
                 if (nodeGlobal.HasValue("kerbalDefaultMass")) evaInventory.kerbalDefaultMass = float.Parse(nodeGlobal.GetValue("kerbalDefaultMass"));
                 SetInventoryConfig(nodeEvaInventory, evaInventory);
                 evaInventory.invType = ModuleKISInventory.InventoryType.Eva;
-                KSPDev.Logger.logInfo("Eva inventory module loaded successfully");
+                //KSPDev.Logger.logInfo("Eva inventory module loaded successfully");
             }
 
             // Set pickup module for eva
@@ -89,7 +89,7 @@ namespace KIS
                 if (nodeEvaPickup.HasValue("attachStaticSndPath")) evaPickup.attachStaticSndPath = nodeEvaPickup.GetValue("attachStaticSndPath");
                 if (nodeEvaPickup.HasValue("detachStaticSndPath")) evaPickup.detachStaticSndPath = nodeEvaPickup.GetValue("detachStaticSndPath");
                 if (nodeEvaPickup.HasValue("draggedIconResolution")) KISAddonPickup.draggedIconResolution = int.Parse(nodeEvaPickup.GetValue("draggedIconResolution"));
-                KSPDev.Logger.logInfo("Eva pickup module loaded successfully");
+                //KSPDev.Logger.logInfo("Eva pickup module loaded successfully");
             }
 
             //-------Female Kerbal
@@ -107,7 +107,7 @@ namespace KIS
                 if (nodeGlobal.HasValue("kerbalDefaultMass")) evaFemaleInventory.kerbalDefaultMass = float.Parse(nodeGlobal.GetValue("kerbalDefaultMass"));
                 SetInventoryConfig(nodeEvaInventory, evaFemaleInventory);
                 evaFemaleInventory.invType = ModuleKISInventory.InventoryType.Eva;
-                KSPDev.Logger.logInfo("Eva inventory module loaded successfully");
+                //KSPDev.Logger.logInfo("Eva inventory module loaded successfully");
             }
 
             // Set pickup module for eva
@@ -127,11 +127,11 @@ namespace KIS
                 if (nodeEvaPickup.HasValue("attachStaticSndPath")) evaFemalePickup.attachStaticSndPath = nodeEvaPickup.GetValue("attachStaticSndPath");
                 if (nodeEvaPickup.HasValue("detachStaticSndPath")) evaFemalePickup.detachStaticSndPath = nodeEvaPickup.GetValue("detachStaticSndPath");
                 if (nodeEvaPickup.HasValue("draggedIconResolution")) KISAddonPickup.draggedIconResolution = int.Parse(nodeEvaPickup.GetValue("draggedIconResolution"));
-                KSPDev.Logger.logInfo("Eva pickup module loaded successfully");
+                //KSPDev.Logger.logInfo("Eva pickup module loaded successfully");
             }
 
             // Set inventory module for every pod with crew capacity
-            KSPDev.Logger.logInfo("Loading pod inventory...");
+            //KSPDev.Logger.logInfo("Loading pod inventory...");
             foreach (AvailablePart avPart in PartLoader.LoadedPartsList)
             {
                 if (avPart.name == "kerbalEVA") continue;
@@ -139,7 +139,7 @@ namespace KIS
                 if (avPart.name == "kerbalEVAfemale") continue;
                 if (!avPart.partPrefab) continue;
                 if (avPart.partPrefab.CrewCapacity < 1) continue;
-                KSPDev.Logger.logInfo("Found part with CrewCapacity: {0}", avPart.name);
+                //KSPDev.Logger.logInfo("Found part with CrewCapacity: {0}", avPart.name);
 
 
                 for (int i = 0; i < avPart.partPrefab.CrewCapacity; i++)
@@ -150,13 +150,11 @@ namespace KIS
                         SetInventoryConfig(nodeEvaInventory, moduleInventory);
                         moduleInventory.podSeat = i;
                         moduleInventory.invType = ModuleKISInventory.InventoryType.Pod;
-                        KSPDev.Logger.logInfo(
-                            "Pod inventory module(s) for seat {0} loaded successfully", i);
+                        //KSPDev.Logger.logInfo("Pod inventory module(s) for seat {0} loaded successfully", i);
                     }
                     catch
                     {
-                        KSPDev.Logger.logWarning(
-                            "Pod inventory module(s) for seat {0} can't be loaded!", i);
+                        //KSPDev.Logger.logWarning("Pod inventory module(s) for seat {0} can't be loaded!", i);
                     }
                 }
             }

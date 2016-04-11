@@ -17,7 +17,7 @@ namespace KIS
 
         public override void OnStart(StartState state)
         {
-            KSPDev.LoggedCallWrapper.Action(Internal_OnStart, state);
+            Internal_OnStart(state);
         }
 
         private void Internal_OnStart(StartState state)
@@ -79,8 +79,7 @@ namespace KIS
                     AttachNode an = this.part.findAttachNode(attachNodeName);
                     if (an == null)
                     {
-                        KSPDev.Logger.logError(
-                            "GetMountNodes - Node : {0} not found !", attachNodeName);
+                        //KSPDev.Logger.logError("GetMountNodes - Node : {0} not found !", attachNodeName);
                         continue;
                     }
 

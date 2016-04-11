@@ -17,7 +17,7 @@ namespace KIS
 
         public override void OnStart(StartState state)
         {
-            KSPDev.LoggedCallWrapper.Action(Internal_OnStart, state);
+            Internal_OnStart(state);
         }
 
         private void Internal_OnStart(StartState state)

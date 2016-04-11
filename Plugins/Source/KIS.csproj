@@ -33,6 +33,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>H:\Steam\steamapps\common\Kerbal Space Program1.1\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>H:\Steam\steamapps\common\Kerbal Space Program1.1\KSP_x64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="KSPCore">
       <HintPath>H:\Steam\steamapps\common\Kerbal Space Program1.1\KSP_x64_Data\Managed\KSPCore.dll</HintPath>
     </Reference>
@@ -74,9 +78,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName)$(TargetExt)" "H:\Steam\steamapps\common\Kerbal Space Program1.1\GameData\KIS\Plugins\" /Y
-xcopy "$(TargetDir)$(TargetName)$(TargetExt)" "C:\Users\Kori\Source\Repos\KIS\Plugins\" /Y
-</PostBuildEvent>
+    <PostBuildEvent>cd $(TargetDir)
+call "C:\Program Files (x86)\Mono\bin\pdb2mdb.bat" $(TargetName)$(TargetExt)"
+xcopy "$(TargetDir)$(TargetName)$(TargetExt)" "H:\Steam\steamapps\common\Kerbal Space Program1.1\GameData\KIS\Plugins\" /Y
+xcopy "$(TargetDir)$(TargetName).pdb" "H:\Steam\steamapps\common\Kerbal Space Program1.1\GameData\KIS\Plugins\" /Y
+xcopy "$(TargetDir)$(TargetName)$(TargetExt).mdb" "H:\Steam\steamapps\common\Kerbal Space Program1.1\GameData\KIS\Plugins\" /Y
+
+xcopy "$(TargetDir)$(TargetName)$(TargetExt)" "C:\Users\Kori\Source\Repos\KIS\Plugins\" /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
