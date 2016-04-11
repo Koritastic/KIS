@@ -19,7 +19,6 @@ namespace KIS
 
 			public override void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData)
 			{
-				Debug.Log("running on input");
 				if (!editorPaction.isGrey) KISAddonPickup.instance.OnMouseGrabPartClick(editorPaction.partInfo.partPrefab);
 			}
 		}
@@ -81,6 +80,16 @@ namespace KIS
         private static Part redockTarget;
         private static string redockVesselName;
         private static bool redockOk;
+
+        // IgorZ: Add this
+        private ScrollSettings mScrollSettings = new ScrollSettings();
+        private class ScrollSettings
+        {
+            public UnityEngine.Events.UnityAction<Vector2> mScrollListener;
+            public Vector3 mRectPos = new Vector3();
+            public float mScrollPos;
+        }
+       
 
         public enum PointerMode { Drop, Attach, ReDock }
         private PointerMode _pointerMode = PointerMode.Drop;
@@ -199,16 +208,17 @@ namespace KIS
                     KISAddonPointer.colorOk = XKCDColors.Teal;
                     KISAddonPointer.allowedAttachmentParts = GetAllowedDockPorts();
                 }
-                KSPDev.Logger.logInfo("Set pointer mode to: {0}", value);
+                //KSPDev.Logger.logInfo("Set pointer mode to: {0}", value);
                 this._pointerMode = value;
             }
         }
 
         void Awake()
         {
-            KSPDev.LoggedCallWrapper.Action(Internal_Awake);
+            Internal_Awake();
         }
 
+        
         private void Internal_Awake()
         {
             instance = this;
@@ -216,11 +226,26 @@ namespace KIS
             {
                 if (EditorPartList.Instance)
                 {
-					var iconPrefab = EditorPartList.Instance.partPrefab.gameObject;
-					if (iconPrefab.GetComponent<EditorClickListener>() == null) {
-						iconPrefab.AddComponent<EditorClickListener>();
-                    } else {
-                        KSPDev.Logger.logWarning("Skip adding click listener because it exists");
+                    var iconPrefab = EditorPartList.Instance.partPrefab.gameObject;
+                    if (iconPrefab.GetComponent<EditorClickListener>() == null) {
+                        iconPrefab.AddComponent<EditorClickListener>();
+                    } else
+                    {
+                        //KSPDev.Logger.logWarning("Skip adding click listener because it exists");
+                    }
+
+                    // IgorZ: Add this
+                    if (mScrollSettings.mScrollListener == null)
+                    {
+                        mScrollSettings.mScrollListener = (Vector2 sp) => {
+                            if(draggedPart != null)
+                            {
+                                EditorPartList.Instance.partListScrollRect.content.localPosition = mScrollSettings.mRectPos;
+                                EditorPartList.Instance.partListScrollRect.verticalScrollbar.value = mScrollSettings.mScrollPos;
+                            }                            
+                        };
+                        
+                        EditorPartList.Instance.partListScrollRect.onValueChanged.AddListener(mScrollSettings.mScrollListener);
                     }
                 }
             }
@@ -228,7 +253,7 @@ namespace KIS
         }
 
         public void Update() {
-            KSPDev.LoggedCallWrapper.Action(Internal_Update);
+            Internal_Update();
         }
 
         private void Internal_Update()
@@ -265,7 +290,7 @@ namespace KIS
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-					if (InputLockManager.IsUnlocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
+                    if (InputLockManager.IsUnlocked(ControlTypes.EDITOR_PAD_PICK_PLACE))
                     {
                         Part part = KIS_Shared.GetPartUnderCursor();
                         if (part)
@@ -286,8 +311,7 @@ namespace KIS
                     // false action triggering. So, just postpone UP even by one frame when it
                     // happens in the same frame as the DOWN event.
                     if (KISAddonCursor.partClickedFrame == Time.frameCount) {
-                        KSPDev.Logger.logWarning(
-                            "Postponing mouse button up event in frame {0}", Time.frameCount);
+                        //KSPDev.Logger.logWarning("Postponing mouse button up event in frame {0}", Time.frameCount);
                         delayedButtonUp = true;  // Event will be handled in the next frame.
                     } else {
                         delayedButtonUp = false;
@@ -380,6 +404,10 @@ namespace KIS
         void OnDestroy()
         {
             GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(this.OnVesselChange));
+
+            // IgorZ: Add this
+            if (EditorPartList.Instance && mScrollSettings.mScrollListener != null)
+                EditorPartList.Instance.partListScrollRect.onValueChanged.RemoveListener(mScrollSettings.mScrollListener);
         }
 
         void OnVesselChange(Vessel vesselChange)
@@ -409,7 +437,7 @@ namespace KIS
                     {
                         Keva.JetpackDeployed = true;
                         jetpackLock = false;
-                        KSPDev.Logger.logInfo("Jetpack mouse input re-enabled");
+                        //KSPDev.Logger.logInfo("Jetpack mouse input re-enabled");
                     }
                 }
             }
@@ -827,7 +855,7 @@ namespace KIS
             draggedPart = part;
             draggedItem = null;
             if (cursorMode == CursorMode.Detach) {
-                KSPDev.Logger.logError("Deatch mode is not expected in Pickup()");
+                //KSPDev.Logger.logError("Deatch mode is not expected in Pickup()");
             }
             Pickup(cursorMode == CursorMode.ReDock ? PickupMode.Undock : PickupMode.Move);
         }
@@ -839,10 +867,17 @@ namespace KIS
             Pickup(PickupMode.GrabFromInventory);
         }
 
+
         private void Pickup(PickupMode newPickupMode)
         {
-            KSPDev.Logger.logInfo("Start pickup in mode {0} from part: {1}",
-                                  newPickupMode, draggedPart);
+            //KSPDev.Logger.logInfo("Start pickup in mode {0} from part: {1}", newPickupMode, draggedPart);
+
+            // IgorZ: Add this
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                mScrollSettings.mRectPos = EditorPartList.Instance.partListScrollRect.content.localPosition;
+                mScrollSettings.mScrollPos = EditorPartList.Instance.partListScrollRect.verticalScrollbar.value;
+            }
             grabbedPart = null;
             pickupMode = newPickupMode;
             cursorMode = CursorMode.Nothing;
@@ -861,7 +896,7 @@ namespace KIS
                     {
                         Keva.JetpackDeployed = false;
                         jetpackLock = true;
-                        KSPDev.Logger.logInfo("Jetpack mouse input disabled");
+                        //KSPDev.Logger.logInfo("Jetpack mouse input disabled");
                     }
                 }
             }
@@ -876,8 +911,7 @@ namespace KIS
         public void Drop(Part part, Part fromPart)
         {
             grabbedPart = part;
-            KSPDev.Logger.logInfo("End pickup of {0} from part: {1}",
-                                  part, fromPart);
+            //KSPDev.Logger.logInfo("End pickup of {0} from part: {1}", part, fromPart);
             if (!KISAddonPointer.isRunning)
             {
                 ModuleKISPickup pickupModule = GetActivePickupNearest(fromPart);
@@ -902,7 +936,7 @@ namespace KIS
                 }
                 else
                 {
-                    KSPDev.Logger.logError("No active pickup nearest !");
+                    //KSPDev.Logger.logError("No active pickup nearest !");
                 }
             }
             KISAddonCursor.StopPartDetection();
@@ -1014,7 +1048,7 @@ namespace KIS
 
         private void MoveDrop(Part tgtPart, Vector3 pos, Quaternion rot)
         {
-            KSPDev.Logger.logInfo("Move part");
+            //KSPDev.Logger.logInfo("Move part");
             ModuleKISPickup modulePickup = GetActivePickupNearest(pos);
             if (modulePickup)
             {
@@ -1043,7 +1077,7 @@ namespace KIS
 
         private Part CreateDrop(Part tgtPart, Vector3 pos, Quaternion rot)
         {
-            KSPDev.Logger.logInfo("Create & drop part");
+            //KSPDev.Logger.logInfo("Create & drop part");
             ModuleKISPickup modulePickup = GetActivePickupNearest(pos);
             draggedItem.StackRemove(1);
             Part newPart = KIS_Shared.CreatePart(draggedItem.partNode, pos, rot, draggedItem.inventory.part);
@@ -1057,7 +1091,7 @@ namespace KIS
 
         private void MoveAttach(Part tgtPart, Vector3 pos, Quaternion rot, string srcAttachNodeID = null, AttachNode tgtAttachNode = null)
         {
-            KSPDev.Logger.logInfo("Move part & attach");
+            //KSPDev.Logger.logInfo("Move part & attach");
             KIS_Shared.SendKISMessage(movingPart, KIS_Shared.MessageAction.AttachStart, KISAddonPointer.GetCurrentAttachNode(), tgtPart, tgtAttachNode);
             KIS_Shared.DecoupleAssembly(movingPart);
             movingPart.vessel.SetPosition(pos);
@@ -1079,7 +1113,7 @@ namespace KIS
 
         private Part CreateAttach(Part tgtPart, Vector3 pos, Quaternion rot, string srcAttachNodeID = null, AttachNode tgtAttachNode = null)
         {
-            KSPDev.Logger.logInfo("Create part & attach");
+            //KSPDev.Logger.logInfo("Create part & attach");
             Part newPart;
             draggedItem.StackRemove(1);
             bool useExternalPartAttach = false;
@@ -1113,7 +1147,7 @@ namespace KIS
             var pickupModules =
                 FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleKISPickup>();
             if (pickupModules.Count > 0) {
-                KSPDev.Logger.logInfo("Enable re-dock mode");
+                //KSPDev.Logger.logInfo("Enable re-dock mode");
                 KISAddonCursor.StartPartDetection(
                     OnMouseRedockPartClick, OnMouseRedockEnterPart, null,
                     OnMouseRedockExitPart);
@@ -1124,7 +1158,7 @@ namespace KIS
         /// <summary>Disables re-docking mode.</summary>
         private void DisableRedockingMode() {
             if (cursorMode == CursorMode.ReDock) {
-                KSPDev.Logger.logInfo("Disable re-dock mode");
+                //KSPDev.Logger.logInfo("Disable re-dock mode");
                 if (redockTarget) {
                     KIS_Shared.SetHierarchySelection(redockTarget, false /* isSelected */);
                 }
@@ -1160,8 +1194,7 @@ namespace KIS
 
                     redockTarget = chkPart;
                     redockVesselName = dockingModule.vesselInfo.name;
-                    KSPDev.Logger.logTrace("Found vessel {0} at dock port {1}",
-                                           redockVesselName, chkPart);
+                    //KSPDev.Logger.logTrace("Found vessel {0} at dock port {1}", redockVesselName, chkPart);
                     break;
                 }
             }
@@ -1263,7 +1296,7 @@ namespace KIS
                     if (item.allowPartAttach == 0) {
                         // Part restricts attachments and detachments.
                         //FIXME: Findout what part cannot be detached. And why.
-                        KSPDev.Logger.logError("Unknown item being detached: {0}", item);
+                        //KSPDev.Logger.logError("Unknown item being detached: {0}", item);
                         ReportCheckError("Can't detach", "(This part can't be detached)");
                         return false;
                     }
@@ -1340,7 +1373,7 @@ namespace KIS
                     result.Add(port);
                 }
             }
-            KSPDev.Logger.logInfo("Found {0} allowed docking ports", result.Count());
+            //KSPDev.Logger.logInfo("Found {0} allowed docking ports", result.Count());
             return result;
         }
 
